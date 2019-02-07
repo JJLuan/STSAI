@@ -58,7 +58,7 @@ public class AgentInjector {
         //    }
         //}
         public static void Postfix(GameActionManager __instance) {
-            if (__instance.phase == GameActionManager.Phase.WAITING_ON_USER) {
+            if (__instance.phase == GameActionManager.Phase.WAITING_ON_USER && !AbstractDungeon.getCurrRoom().isBattleOver) {
                 logger.info("get agent action");
                 Agent.playFirstPlayable(AbstractDungeon.player);
             }

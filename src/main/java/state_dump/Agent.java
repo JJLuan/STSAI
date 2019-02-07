@@ -6,6 +6,7 @@ import com.megacrit.cardcrawl.characters.AbstractPlayer;
 
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
+import com.megacrit.cardcrawl.ui.panels.EnergyPanel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -21,13 +22,14 @@ public class Agent {
 
 
     public static void playFirstPlayable(AbstractPlayer p) {
+        logger.info(p.energy.energy);
         if (p.hand.size() == 0) {
             logger.info("empty hand");
             return;
         }
 
-        if (p.energy.energy == 0) {
-            AbstractDungeon.actionManager.endTurn();
+        if (EnergyPanel.getCurrentEnergy() == 0) {
+            AbstractDungeon.overlayMenu.endTurnButton.disable(true);
             return;
         }
 
@@ -67,7 +69,7 @@ public class Agent {
         }
         else {
             logger.info("couldn't pick a card, ending turn");
-            AbstractDungeon.actionManager.endTurn();
+            AbstractDungeon.overlayMenu.endTurnButton.disable(true);
         }
     }
 }
