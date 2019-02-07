@@ -1,9 +1,6 @@
 package state_dump;
 import basemod.BaseMod;
-import basemod.interfaces.OnCardUseSubscriber;
-import basemod.interfaces.PostBattleSubscriber;
-import basemod.interfaces.PostEnergyRechargeSubscriber;
-import basemod.interfaces.StartGameSubscriber;
+import basemod.interfaces.*;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
@@ -16,7 +13,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 
 @SpireInitializer
-public class StateDump implements OnCardUseSubscriber, PostBattleSubscriber, PostEnergyRechargeSubscriber {
+public class StateDump implements OnCardUseSubscriber, PostBattleSubscriber, PostEnergyRechargeSubscriber, OnStartBattleSubscriber {
     private ArrayList<AbstractCard> cardList;
     public static final Logger logger = LogManager.getLogger(StateDump.class.getName());
 
@@ -27,6 +24,15 @@ public class StateDump implements OnCardUseSubscriber, PostBattleSubscriber, Pos
 
     public static void initialize() {
         new StateDump();
+    }
+
+
+    public static void DumpBattleState() {
+        AbstractPlayer player = AbstractDungeon.player;
+        logger.info("Cards in draw pile: ");
+        for (AbstractCard c : player.drawPile.group) {
+            logger.info(c.name);
+        }
     }
 
     @Override
@@ -47,6 +53,11 @@ public class StateDump implements OnCardUseSubscriber, PostBattleSubscriber, Pos
     @Override
     public void receivePostEnergyRecharge() {
         logger.info("turn start!");
+    }
 
+    @Override
+    public void receiveOnBattleStart(AbstractRoom abstractRoom) {
+        logger.info("battle start");
+        DumpBattleState();
     }
 }
