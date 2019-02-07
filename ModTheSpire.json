@@ -1,0 +1,9 @@
+{
+  "modid" : "STSAI",
+  "name": "STSAI",
+  "author_list": ["John L"],
+  "description": "STSAI",
+  "version": "0.1",
+  "dependencies": ["basemod"],
+  "mts_version": "3.8.3"
+}
