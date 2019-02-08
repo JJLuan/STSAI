@@ -13,7 +13,7 @@
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
-            <version>3.6.0</version>
+            <version>3.6.1</version>
         </dependency>
         <dependency>
             <groupId>com.github.os72</groupId>
@@ -62,6 +62,19 @@
                     <execution>
                         <phase>generate-sources</phase>
                         <goals><goal>run</goal></goals>
+                        <configuration>
+                            <protocArtifact>
+                                com.google.protobuf:protoc:3.6.1
+                            </protocArtifact>
+                            <inputDirectories>
+                                <include>src/main/resources</include>
+                            </inputDirectories>
+                            <outputTargets>
+                                <outputTarget>
+                                    <type>java</type>
+                                </outputTarget>
+                            </outputTargets>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
