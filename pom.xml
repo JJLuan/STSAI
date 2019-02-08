@@ -93,5 +93,6 @@
                 </executions>
             </plugin>
         </plugins>
+        <sourceDirectory>${basedir}/src/main/interface/java/</sourceDirectory>
     </build>
 </project>
