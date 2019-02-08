@@ -5,6 +5,8 @@ import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
 
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
+import com.megacrit.cardcrawl.helpers.CardLibrary;
+import com.megacrit.cardcrawl.helpers.RelicLibrary;
 import com.megacrit.cardcrawl.monsters.AbstractMonster;
 import com.megacrit.cardcrawl.ui.panels.EnergyPanel;
 import org.apache.logging.log4j.LogManager;
@@ -13,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 
 public class Agent {
     public static final Logger logger = LogManager.getLogger(Agent.class.getName());
@@ -71,5 +74,24 @@ public class Agent {
             logger.info("couldn't pick a card, ending turn");
             AbstractDungeon.overlayMenu.endTurnButton.disable(true);
         }
+    }
+
+    public static ArrayList<AbstractCard> getListOfCardsInHand(AbstractPlayer player){
+        ArrayList<AbstractCard> cards = new ArrayList<>();
+
+        for (AbstractCard card : player.hand.group){
+            logger.info(String.format("Player Hand:\t%s", card.name));
+        }
+
+        return player.hand.group;
+    }
+
+    public static void dumpInfo(){
+        logger.info(String.format("Number of cards:\t%d", CardLibrary.getAllCards().size()));
+        int totalNumRelics = 0;
+        totalNumRelics += RelicLibrary.blueList.size() + RelicLibrary.greenList.size() + RelicLibrary.redList.size();
+        totalNumRelics += RelicLibrary.commonList.size() + RelicLibrary.rareList.size() + RelicLibrary.bossList.size();
+
+        logger.info(String.format("Number of relics:\t%d", totalNumRelics));
     }
 }

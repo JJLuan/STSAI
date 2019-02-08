@@ -60,7 +60,10 @@ public class AgentInjector {
         public static void Postfix(GameActionManager __instance) {
             if (__instance.phase == GameActionManager.Phase.WAITING_ON_USER && !AbstractDungeon.getCurrRoom().isBattleOver) {
                 logger.info("get agent action");
+                Agent.getListOfCardsInHand(AbstractDungeon.player);
                 Agent.playFirstPlayable(AbstractDungeon.player);
+
+                Agent.dumpInfo();
             }
         }
 
