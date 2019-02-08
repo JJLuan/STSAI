@@ -1,23 +1,15 @@
-package state_dump;
+package ai;
 
 import com.evacipated.cardcrawl.modthespire.lib.*;
-import com.evacipated.cardcrawl.modthespire.patcher.PatchingException;
 import com.megacrit.cardcrawl.actions.GameActionManager;
-import com.megacrit.cardcrawl.actions.common.EnableEndTurnButtonAction;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
 import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
 import javassist.CannotCompileException;
-import javassist.CtBehavior;
-import javassist.NotFoundException;
-import javassist.expr.ConstructorCall;
 import javassist.expr.ExprEditor;
 import javassist.expr.FieldAccess;
 
-import javassist.expr.MethodCall;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.ArrayList;
 
 public class AgentInjector {
     public static final Logger logger = LogManager.getLogger(AgentInjector.class.getName());
@@ -42,7 +34,7 @@ public class AgentInjector {
         //public static void Insert(GameActionManager __instance) {
         //    if (__instance.phase == GameActionManager.Phase.WAITING_ON_USER) {
         //        logger.info("starting agent...");
-        //        Agent.playFirstPlayable(AbstractDungeon.player);
+        //        SimpleRandomAgent.playFirstPlayable(AbstractDungeon.player);
         //    }
         //}
 
@@ -57,10 +49,14 @@ public class AgentInjector {
         //        }
         //    }
         //}
+
         public static void Postfix(GameActionManager __instance) {
-            if (__instance.phase == GameActionManager.Phase.WAITING_ON_USER && !AbstractDungeon.getCurrRoom().isBattleOver) {
+            if (__instance.phase == GameActionManager.Phase.WAITING_ON_USER
+                    && !(AbstractDungeon.getCurrRoom().isBattleOver
+                    || AbstractDungeon.getCurrRoom().isBattleEnding())
+                    && AbstractDungeon.actionManager.isEmpty()) {
                 logger.info("get agent action");
-                Agent.playFirstPlayable(AbstractDungeon.player);
+                SimpleRandomAgent.playFirstPlayable(AbstractDungeon.player);
             }
         }
 
@@ -91,7 +87,7 @@ public class AgentInjector {
                     logger.info("Field access for "+f.getFieldName()+ ": "+f.getLineNumber());
                     if (f.getFieldName().equals("hoveredMonster")) {
                         logger.info(f.getEnclosingClass().getName());
-                        f.replace("{$_ = state_dump.Agent.target;}");
+                        f.replace("{$_ = ai.SimpleRandomAgent.target;}");
                     }
 
                 }

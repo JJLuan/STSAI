@@ -1,6 +1,5 @@
-package state_dump;
+package ai;
 
-import com.megacrit.cardcrawl.actions.GameActionManager;
 import com.megacrit.cardcrawl.cards.AbstractCard;
 import com.megacrit.cardcrawl.characters.AbstractPlayer;
 
@@ -10,19 +9,22 @@ import com.megacrit.cardcrawl.ui.panels.EnergyPanel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-public class Agent {
-    public static final Logger logger = LogManager.getLogger(Agent.class.getName());
+public class SimpleRandomAgent {
+    public static final Logger logger = LogManager.getLogger(SimpleRandomAgent.class.getName());
     public static boolean fullControl = true;
 
     public static AbstractMonster target = null;
 
 
     public static void playFirstPlayable(AbstractPlayer p) {
-        logger.info(p.energy.energy);
+        if (!AbstractDungeon.actionManager.isEmpty()) {
+            logger.info("action manager is not empty, no action taken");
+            return;
+        }
+
         if (p.hand.size() == 0) {
             logger.info("empty hand");
             return;
@@ -52,10 +54,15 @@ public class Agent {
         if (picked){
             try {
                 if (p.hoveredCard != null && AbstractDungeon.getMonsters() != null)
-                    logger.info(String.format("attempting to play %s targeting %s in position %d", p.hoveredCard.name, target, AbstractDungeon.getMonsters().monsters.indexOf(target)));
+                    logger.info(String.format("attempting to play %s targeting %s in position %d",
+                            (p.hoveredCard == null ? null : p.hoveredCard.target),
+                            target,
+                            (AbstractDungeon.getMonsters() == null ? null : AbstractDungeon.getMonsters().monsters.indexOf(target))));
+
                 Method m = p.getClass().getSuperclass().getDeclaredMethod("playCard");
                 m.setAccessible(true);
                 m.invoke(p);
+
 
                 //last_hand_size = p.hand.size();
 
