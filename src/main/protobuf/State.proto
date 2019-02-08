@@ -1,0 +1,17 @@
+syntax = "proto2";
+
+package tutorial;
+
+option java_package = "state";
+option java_outer_classname = "StateProtos";
+
+message Deck {
+    required int32 size = 1;
+}
+
+message State {
+  required Deck deck = 1;
+  required int32 numRelics = 2;
+
+}
+
