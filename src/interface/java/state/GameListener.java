@@ -1,4 +1,4 @@
-package state_dump;
+package state;
 import basemod.BaseMod;
 import basemod.interfaces.*;
 import com.evacipated.cardcrawl.modthespire.lib.SpireInitializer;
@@ -13,17 +13,17 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 
 @SpireInitializer
-public class StateDump implements OnCardUseSubscriber, PostBattleSubscriber, PostEnergyRechargeSubscriber, OnStartBattleSubscriber {
+public class GameListener implements OnCardUseSubscriber, PostBattleSubscriber, PostEnergyRechargeSubscriber, OnStartBattleSubscriber {
     private ArrayList<AbstractCard> cardList;
-    public static final Logger logger = LogManager.getLogger(StateDump.class.getName());
+    public static final Logger logger = LogManager.getLogger(GameListener.class.getName());
 
-    public StateDump() {
+    public GameListener() {
         BaseMod.subscribe(this);
         cardList = new ArrayList<>();
     }
 
     public static void initialize() {
-        new StateDump();
+        new GameListener();
     }
 
 
