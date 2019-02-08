@@ -10,8 +10,7 @@ message Deck {
 }
 
 message State {
-  required Deck deck = 1;
-  required int32 numRelics = 2;
+    required Deck deck = 1;
+    required int32 numRelics = 2;
 
 }
-
