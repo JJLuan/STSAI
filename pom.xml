@@ -10,6 +10,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>1.6.0</version>
+        </dependency>
+        <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
             <version>3.6.0</version>
@@ -43,6 +48,7 @@
         </dependency>
     </dependencies>
 
+
     <build>
         <finalName>STSAI</finalName>
         <resources>
@@ -54,6 +60,25 @@
             </resource>
         </resources>
         <plugins>
+            <!--<plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.6.0</version>
+                <configuration>
+                    <executableDependency>
+                        <groupId>com.github.os72</groupId>
+                        <artifactId>protoc-jar-maven-plugin</artifactId>
+                    </executableDependency>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>-->
             <plugin>
                 <groupId>com.github.os72</groupId>
                 <artifactId>protoc-jar-maven-plugin</artifactId>
@@ -62,6 +87,17 @@
                     <execution>
                         <phase>generate-sources</phase>
                         <goals><goal>run</goal></goals>
+                        <configuration>
+                            <inputDirectories>src/main/protobuf</inputDirectories>
+                            <outputTargets>
+                                <outputTarget>
+                                    <type>java</type>
+                                </outputTarget>
+                                <outputTarget>
+                                    <type>python</type>
+                                </outputTarget>
+                            </outputTargets>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -85,6 +121,7 @@
                             <goal>copy-dependencies</goal>
                         </goals>
                         <configuration>
+                            <excludeGroupIds>com.megacrit.cardcrawl,com.evacipated.cardcrawl,basemod</excludeGroupIds>
                             <outputDirectory>${project.build.directory}/lib</outputDirectory>
                         </configuration>
                     </execution>
@@ -117,9 +154,9 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
+                    <descriptors>
+                        <descriptor>/assembly.xml</descriptor>
+                    </descriptors>
                 </configuration>
             </plugin>
 

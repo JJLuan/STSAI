@@ -1,16 +1,20 @@
-syntax = "proto2";
+syntax = "proto3";
 
-package tutorial;
+package state;
 
-option java_package = "state";
-option java_outer_classname = "StateProtos";
+option java_outer_classname = "StateProto";
+
+message Card {
+    string name = 1;
+}
 
 message Deck {
-    required int32 size = 1;
+    int32 size = 1;
+    repeated Card c = 2;
 }
 
 message State {
-    required Deck deck = 1;
-    required int32 numRelics = 2;
+    Deck deck = 1;
+    int32 numRelics = 2;
 
 }

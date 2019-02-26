@@ -12,10 +12,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -30,27 +30,27 @@ public class GameListener implements OnCardUseSubscriber, PostBattleSubscriber, 
     public static final Logger logger = LogManager.getLogger(GameListener.class.getName());
 
     private static MappedByteBuffer mmap;
+    private static FileChannel fc;
+    private static FileLock fl;
     private static int proto_size;
+
+    private static StateProto.State global_state;
 
     private static ByteArrayOutputStream out;
 
     public GameListener() {
         BaseMod.subscribe(this);
         cardList = new ArrayList<>();
-        Path f = Paths.get(System.getProperty("user.dir") + "/state.data");
+        Path f = Paths.get(System.getProperty("user.dir") + "/global_state.data");
         logger.info("opening memory map at: "+f.toString());
-        try (FileChannel fc = (FileChannel) Files.newByteChannel(f, EnumSet.of(StandardOpenOption.READ, StandardOpenOption.WRITE))) {
+        try {
             f.toFile().createNewFile();
+            fc = (FileChannel) Files.newByteChannel(f, EnumSet.of(StandardOpenOption.READ, StandardOpenOption.WRITE));
             mmap = fc.map(FileChannel.MapMode.READ_WRITE, 0, 1048576);
 
         } catch (IOException e) {
             logger.error("problem trying to map to file:");
             logger.catching(e);
-        }
-        if (mmap != null) {
-            byte[] buf = StateHandler.TestState().toByteArray();
-            proto_size = buf.length;
-            mmap.put(buf);
         }
     }
 
@@ -80,6 +80,26 @@ public class GameListener implements OnCardUseSubscriber, PostBattleSubscriber, 
         }
 
         cardList.clear();
+        try (FileLock ignored = GameListener.fc.lock()) {
+            logger.info("last known buf size "+proto_size);
+            byte[] buf = new byte[proto_size];
+            mmap.position(0);
+            logger.info("reading from position "+mmap.position());
+            mmap.get(buf);
+            logger.info(Arrays.toString(buf));
+            StateProto.State s  = StateProto.State.parseFrom(buf);
+            logger.info(s.toString());
+        } catch (InvalidProtocolBufferException e) {
+            logger.error("bad protocol buffer");
+            logger.catching(e);
+        } catch (IOException e) {
+            logger.error("ioexception trying to lock mmap");
+            logger.catching(e);
+        }
+
+
+
+
     }
 
     @Override
@@ -90,22 +110,36 @@ public class GameListener implements OnCardUseSubscriber, PostBattleSubscriber, 
     @Override
     public void receiveOnBattleStart(AbstractRoom abstractRoom) {
         logger.info("battle start");
-        DumpBattleState();
+
+        ArrayList<StateProto.Card> deck = new ArrayList<>();
+        for (AbstractCard ac : AbstractDungeon.player.masterDeck.group) {
+            deck.add(StateProto.Card.newBuilder().setName(ac.name).build());
+        }
+
+        global_state = StateProto.State.newBuilder()
+                .setNumRelics(AbstractDungeon.player.relics.size())
+                .setDeck(StateProto.Deck.newBuilder()
+                        .addAllC(deck)
+                        .setSize(deck.size()))
+                .build();
+
+        try (FileLock ignored = GameListener.fc.lock()){
+            if (mmap != null) {
+                byte[] buf = global_state.toByteArray();
+                proto_size = buf.length;
+                logger.info("writing "+proto_size+" bytes");
+                logger.info(Arrays.toString(buf));
+                mmap.position(0);
+                mmap.put(buf, 0, proto_size);
+            }
+        } catch (IOException e) {
+            logger.error("ioexception trying to lock mmap");
+            logger.catching(e);
+        }
     }
 
     @Override
     public void receivePostDungeonInitialize() {
         logger.info(String.format("reading mmap, %d bytes", proto_size));
-        try {
-            byte[] buf = new byte[proto_size];
-            mmap.position(0);
-            mmap.get(buf);
-            logger.info(Arrays.toString(buf));
-            StateProtos.State s  = StateProtos.State.parseFrom(buf);
-            logger.info(s.toString());
-        } catch (InvalidProtocolBufferException e) {
-            logger.error("bad protocol buffer");
-            logger.catching(e);
-        }
     }
 }
